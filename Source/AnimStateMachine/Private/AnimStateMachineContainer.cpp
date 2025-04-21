@@ -36,23 +36,57 @@ bool UAnimStateMachineContainer::Initialize(UAnimInstance* AnimInstance)
 		}
 	}
 
+	bInitialized = true;
 	return false;
 }
 
 void UAnimStateMachineContainer::BeginPlay()
 {
+	for (UAnimStateMachine* AnimStateMachine : MachineInstances)
+	{
+		if (AnimStateMachine)
+		{
+			AnimStateMachine->BeginPlay();
+		}
+	}
 }
 
 void UAnimStateMachineContainer::UpdateAnimation(const float DeltaSeconds)
 {
+	for (UAnimStateMachine* AnimStateMachine : MachineInstances)
+	{
+		if (AnimStateMachine)
+		{
+			AnimStateMachine->UpdateAnimation(DeltaSeconds);
+		}
+	}
 }
 
 void UAnimStateMachineContainer::PostEvaluateAnimation()
 {
+	for (UAnimStateMachine* AnimStateMachine : MachineInstances)
+	{
+		if (AnimStateMachine)
+		{
+			AnimStateMachine->PostEvaluateAnimation();
+		}
+	}
 }
 
 void UAnimStateMachineContainer::Teardown()
 {
+	for (UAnimStateMachine* AnimStateMachine : MachineInstances)
+	{
+		if (AnimStateMachine)
+		{
+			AnimStateMachine->Teardown();
+		}
+	}
+
+	MachineInstances.Reset();
+	CacheIndexToMachineMap.Empty();
+	CacheNameToMachineMap.Empty();
+	bInitialized = false;
 }
 
 UWorld* UAnimStateMachineContainer::GetWorld() const
@@ -62,4 +96,42 @@ UWorld* UAnimStateMachineContainer::GetWorld() const
 		return AnimInstance->GetWorld();
 	}
 	return nullptr;
+}
+
+UAnimStateMachine* UAnimStateMachineContainer::GetMachineInstanceByIndex(int32 MachineIndex) const
+{
+	return CacheIndexToMachineMap.FindRef(MachineIndex);
+}
+
+UAnimStateMachine* UAnimStateMachineContainer::GetMachineInstanceByName(const FName& MachineName) const
+{
+	return CacheNameToMachineMap.FindRef(MachineName);
+}
+
+UAnimState* UAnimStateMachineContainer::GetStateInstanceByName(const FName& MachineName, const FName& StateName) const
+{
+	if (const UAnimStateMachine* StateMachine = GetMachineInstanceByName(MachineName))
+	{
+		return StateMachine->GetStateInstanceByName(StateName);
+	}
+
+	return nullptr;
+}
+
+UAnimState* UAnimStateMachineContainer::GetStateInstanceByIndex(int32 MachineIndex, int32 StateIndex) const
+{
+	if (const UAnimStateMachine* StateMachine = GetMachineInstanceByIndex(MachineIndex))
+	{
+		return StateMachine->GetStateInstanceByIndex(StateIndex);
+	}
+	return nullptr;
+}
+
+FName UAnimStateMachineContainer::GetMachineCurrentStateName(const FName& MachineName) const
+{
+	if (const UAnimStateMachine* StateMachine = GetMachineInstanceByName(MachineName))
+	{
+		return StateMachine->GetCurrentStateName();
+	}
+	return NAME_None;
 }

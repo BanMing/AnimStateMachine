@@ -14,7 +14,7 @@ class UAnimState;
 /**
  *
  */
-UCLASS(Abstract, Blueprintable, BlueprintType)
+UCLASS(Blueprintable, BlueprintType)
 class ANIMSTATEMACHINE_API UAnimStateMachineContainer : public UObject
 {
 	GENERATED_BODY()
@@ -25,6 +25,13 @@ public:
 	void PostEvaluateAnimation();
 	void Teardown();
 	virtual UWorld* GetWorld() const override;
+
+public:
+	UAnimStateMachine* GetMachineInstanceByIndex(int32 MachineIndex) const;
+	UAnimStateMachine* GetMachineInstanceByName(const FName& MachineName) const;
+	UAnimState* GetStateInstanceByName(const FName& MachineName, const FName& StateName) const;
+	UAnimState* GetStateInstanceByIndex(int32 MachineIndex, int32 StateIndex) const;
+	FName GetMachineCurrentStateName(const FName& MachineName) const;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)

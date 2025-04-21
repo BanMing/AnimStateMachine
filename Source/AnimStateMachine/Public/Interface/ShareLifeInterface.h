@@ -37,33 +37,33 @@ protected:
 	virtual void Reset() = 0;
 
 protected:
-	UFUNCTION(BlueprintNativeEvent, Category = "Animation State")
+	UFUNCTION(BlueprintNativeEvent, Category = "Anim State")
 	void OnInitialize();
 
-	UFUNCTION(BlueprintNativeEvent, Category = "Animation State")
+	UFUNCTION(BlueprintNativeEvent, Category = "Anim State")
 	void OnBeginPlay();
 
-	UFUNCTION(BlueprintNativeEvent, Category = "Animation State")
+	UFUNCTION(BlueprintNativeEvent, Category = "Anim State")
 	void OnBegin();
 
-	UFUNCTION(BlueprintNativeEvent, Category = "Animation State")
+	UFUNCTION(BlueprintNativeEvent, Category = "Anim State")
 	void OnUpdateAnimation(const float DeltaSeconds);
 
-	UFUNCTION(BlueprintNativeEvent, Category = "Animation State")
+	UFUNCTION(BlueprintNativeEvent, Category = "Anim State")
 	void OnPostEvaluateAnimation();
 
-	UFUNCTION(BlueprintNativeEvent, Category = "Animation State")
+	UFUNCTION(BlueprintNativeEvent, Category = "Anim State")
 	void OnEnd();
 
-	UFUNCTION(BlueprintNativeEvent, Category = "Animation State")
+	UFUNCTION(BlueprintNativeEvent, Category = "Anim State")
 	void OnTeardown();
 
-	UFUNCTION(BlueprintNativeEvent, Category = "AnimStateMachine")
+	UFUNCTION(BlueprintNativeEvent, Category = "Anim State Machine")
 	void OnStateMachineBecomeRelevant();
 
-	UFUNCTION(BlueprintNativeEvent, Category = "AnimStateMachine")
+	UFUNCTION(BlueprintNativeEvent, Category = "Anim State Machine")
 	void OnStateMachineStartBlendingOut();
 
-	UFUNCTION(BlueprintNativeEvent, Category = "AnimStateMachine")
+	UFUNCTION(BlueprintNativeEvent, Category = "Anim State Machine")
 	void OnStateMachineFinishingBlendingOut();
 };

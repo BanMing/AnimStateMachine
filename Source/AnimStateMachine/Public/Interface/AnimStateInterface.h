@@ -12,7 +12,7 @@ class UAnimStateMachine;
 
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI)
-class UAnimStateInterface : public UInterface
+class UAnimStateInterface : public UShareLifeInterface
 {
 	GENERATED_BODY()
 };

@@ -3,6 +3,7 @@
 #pragma once
 #include "AnimStateRelevancyStatus.h"
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "Interface/AnimStateMachineInterface.h"
 #include "UObject/Object.h"
 
@@ -132,6 +133,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AnimStateMachine")
 	TArray<TSubclassOf<UAnimState>> AnimStateClasses;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AnimStateMachine")
+	bool bForceUpdateAnimation = false;
 
 protected:
 	UPROPERTY()

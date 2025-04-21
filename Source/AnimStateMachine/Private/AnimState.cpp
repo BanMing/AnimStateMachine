@@ -2,6 +2,7 @@
 
 #include "AnimState.h"
 
+#include "AbilitySystemBlueprintLibrary.h"
 #include "AnimStateMachine.h"
 #include "AnimStateMachineLogChannels.h"
 
@@ -66,6 +67,10 @@ void UAnimState::Begin()
 	}
 #endif
 	OnBegin();
+	if (StateTag.IsValid())
+	{
+		UAbilitySystemBlueprintLibrary::AddLooseGameplayTags(GetOwningActor(), StateTag.GetSingleTagContainer());
+	}
 }
 
 void UAnimState::UpdateAnimation(const float DeltaSeconds)
@@ -147,7 +152,12 @@ void UAnimState::End()
 	}
 #endif
 	OnEnd();
+	if (StateTag.IsValid())
+	{
+		UAbilitySystemBlueprintLibrary::RemoveLooseGameplayTags(GetOwningActor(), StateTag.GetSingleTagContainer());
+	}
 }
+
 UWorld* UAnimState::GetWorld() const
 {
 	if (UAnimStateMachine* AnimStateMachine = CachedMachineOwner.Get())

@@ -2,10 +2,13 @@
 
 #include "AnimStateMachine.h"
 
+#include "AbilitySystemBlueprintLibrary.h"
 #include "AnimState.h"
 #include "AnimStateMachineLogChannels.h"
 #include "Animation/AnimNode_StateMachine.h"
 #include "Animation/AnimStateMachineTypes.h"
+#include "GameFramework/Character.h"
+#include "GameFramework/Pawn.h"
 
 #if ENABLE_ANIM_DEBUG
 TAutoConsoleVariable<int32> CVarAnimStateMachineDebug(TEXT("a.AnimStateMachine.Debug"), 0, TEXT("Turn on visualization debugging for Animation State Machine"));
@@ -95,7 +98,7 @@ void UAnimStateMachine::BeginPlay()
 
 void UAnimStateMachine::UpdateAnimation(const float DeltaSeconds)
 {
-	if (IsRelevant())
+	if (IsRelevant() || bForceUpdateAnimation)
 	{
 #if ENABLE_ANIM_DEBUG
 		bool bDebugging = CVarAnimStateMachineDebug.GetValueOnAnyThread() == 1;
@@ -500,6 +503,10 @@ void UAnimStateMachine::CheckStateMachineActive()
 			}
 #endif
 			OnStateMachineBecomeActive();
+			if (MachineTag.IsValid())
+			{
+				UAbilitySystemBlueprintLibrary::AddLooseGameplayTags(GetOwningActor(), MachineTag.GetSingleTagContainer());
+			}
 		}
 		else
 		{
@@ -511,6 +518,10 @@ void UAnimStateMachine::CheckStateMachineActive()
 			}
 #endif
 			OnStateMachineBecomeInactive();
+			if (MachineTag.IsValid())
+			{
+				UAbilitySystemBlueprintLibrary::RemoveLooseGameplayTags(GetOwningActor(), MachineTag.GetSingleTagContainer());
+			}
 		}
 	}
 }
