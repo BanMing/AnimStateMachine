@@ -66,7 +66,7 @@ bool UAnimStateMachine::Initialize(UAnimInstance* AnimInstance)
 		UE_LOG(LogAnimStateMachine, Log, TEXT("OnStateMachineInitialize. (%s)"), *CachedMachineFullNameString);
 	}
 #endif
-	OnInitialize();
+	Execute_OnInitialize(this);
 
 	// Create AnimState Object instance
 	for (TSubclassOf<UAnimState>& StateClass : AnimStateClasses)
@@ -89,7 +89,7 @@ bool UAnimStateMachine::Initialize(UAnimInstance* AnimInstance)
 
 void UAnimStateMachine::BeginPlay()
 {
-	OnBeginPlay();
+	Execute_OnBeginPlay(this);
 	for (UAnimState* StateInstance : StateInstances)
 	{
 		StateInstance->BeginPlay();
@@ -108,7 +108,7 @@ void UAnimStateMachine::UpdateAnimation(const float DeltaSeconds)
 		}
 #endif
 
-		OnUpdateAnimation(DeltaSeconds);
+		Execute_OnUpdateAnimation(this, DeltaSeconds);
 
 		for (UAnimState* StateInstance : StateInstances)
 		{
@@ -119,15 +119,9 @@ void UAnimStateMachine::UpdateAnimation(const float DeltaSeconds)
 
 void UAnimStateMachine::PostEvaluateAnimation()
 {
-	PreviousStateName = CurrentStateName;
-	PreviousStateInstance = CurrentStateInstance;
-
-	CurrentStateName = NodeInstance->GetCurrentStateName();
-	CurrentStateIndex = NodeInstance->GetCurrentState();
-	CurrentStateElapsedTime = NodeInstance->GetCurrentStateElapsedTime();
-	CurrentStateInstance = GetStateInstanceByName(CurrentStateName);
-
 	RelevancyStatus.UpdateWeight(NativeGetMachineWeight());
+
+	CheckStateMachineActive();
 
 #if ENABLE_ANIM_DEBUG
 	bool bDebugging = CVarAnimStateMachineDebug.GetValueOnAnyThread() == 1;
@@ -150,9 +144,7 @@ void UAnimStateMachine::PostEvaluateAnimation()
 	// Check State Machine Start Blending Out
 	CheckStateMachineBlendingOut();
 
-	CheckStateMachineActive();
-
-	OnStateMachinePostEvaluateAnimation();
+	Execute_OnStateMachinePostEvaluateAnimation(this);
 
 	for (UAnimState* StateInstance : StateInstances)
 	{
@@ -206,7 +198,7 @@ void UAnimStateMachine::Teardown()
 			UE_LOG(LogAnimStateMachine, Log, TEXT("OnStateMachineTeardown. (%s)"), *CachedMachineFullNameString);
 		}
 #endif
-		OnStateMachineTeardown();
+		Execute_OnStateMachineTeardown(this);
 	}
 
 	bInitialized = false;
@@ -422,7 +414,7 @@ void UAnimStateMachine::CheckStateMachineBecomeRelevant()
 			UE_LOG(LogAnimStateMachine, Log, TEXT("OnStateMachineBecomeRelevant. (%s)"), *CachedMachineFullNameString);
 		}
 #endif
-		OnStateMachineBecomeRelevant();
+		Execute_OnStateMachineBecomeRelevant(this);
 		for (const auto StateInstance : StateInstances)
 		{
 			StateInstance->StateMachineBecomeRelevant();
@@ -441,7 +433,7 @@ void UAnimStateMachine::CheckStateMachineBlendingOut()
 			UE_LOG(LogAnimStateMachine, Log, TEXT("OnStateMachineBlendingOut. (%s)"), *CachedMachineFullNameString);
 		}
 #endif
-		OnStateMachineStartBlendingOut();
+		Execute_OnStateMachineStartBlendingOut(this);
 		for (const auto StateInstance : StateInstances)
 		{
 			StateInstance->StateMachineStartBlendingOut();
@@ -458,7 +450,7 @@ void UAnimStateMachine::CheckStateMachineBlendingOut()
 			UE_LOG(LogAnimStateMachine, Log, TEXT("OnStateMachineFinishingBlendingOut. (%s)"), *CachedMachineFullNameString);
 		}
 #endif
-		OnStateMachineFinishingBlendingOut();
+		Execute_OnStateMachineFinishingBlendingOut(this);
 		for (const auto StateInstance : StateInstances)
 		{
 			StateInstance->StateMachineFinishingBlendingOut();
@@ -468,6 +460,26 @@ void UAnimStateMachine::CheckStateMachineBlendingOut()
 
 void UAnimStateMachine::CheckStateChanged()
 {
+	if (!FAnimWeight::IsRelevant(StateIndexToStateWeightMap[NodeInstance->GetCurrentState()]))
+	{
+		if (CurrentStateInstance)
+		{
+			CurrentStateInstance->End();
+			CurrentStateInstance = nullptr;
+			CurrentStateName = NAME_None;
+		}
+		return;
+	}
+
+	PreviousStateName = CurrentStateName;
+	PreviousStateInstance = CurrentStateInstance;
+
+	CurrentStateName = NodeInstance->GetCurrentStateName();
+	CurrentStateIndex = NodeInstance->GetCurrentState();
+
+	CurrentStateElapsedTime = NodeInstance->GetCurrentStateElapsedTime();
+	CurrentStateInstance = GetStateInstanceByName(CurrentStateName);
+
 	if (PreviousStateName != CurrentStateName)
 	{
 		bHasStateChanged = true;
@@ -479,7 +491,7 @@ void UAnimStateMachine::CheckStateChanged()
 		{
 			CurrentStateInstance->Begin();
 		}
-		OnStateMachineStateChanged(PreviousStateInstance, CurrentStateInstance);
+		Execute_OnStateMachineStateChanged(this, PreviousStateInstance, CurrentStateInstance);
 	}
 	else
 	{
@@ -502,7 +514,7 @@ void UAnimStateMachine::CheckStateMachineActive()
 				UE_LOG(LogAnimStateMachine, Log, TEXT("OnStateMachineBecomeActive. (%s)"), *CachedMachineFullNameString);
 			}
 #endif
-			OnStateMachineBecomeActive();
+			Execute_OnStateMachineBecomeActive(this);
 			if (MachineTag.IsValid())
 			{
 				UAbilitySystemBlueprintLibrary::AddLooseGameplayTags(GetOwningActor(), MachineTag.GetSingleTagContainer());
@@ -517,7 +529,7 @@ void UAnimStateMachine::CheckStateMachineActive()
 				UE_LOG(LogAnimStateMachine, Log, TEXT("OnStateMachineBecomeInactive. (%s)"), *CachedMachineFullNameString);
 			}
 #endif
-			OnStateMachineBecomeInactive();
+			Execute_OnStateMachineBecomeInactive(this);
 			if (MachineTag.IsValid())
 			{
 				UAbilitySystemBlueprintLibrary::RemoveLooseGameplayTags(GetOwningActor(), MachineTag.GetSingleTagContainer());

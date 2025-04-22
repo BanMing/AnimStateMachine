@@ -41,11 +41,11 @@ bool UAnimState::Initialize(UAnimStateMachine* MachineOwner)
 	bool bDebugging = CVarAnimStateDebug.GetValueOnAnyThread() == 1;
 	if (bDebugging)
 	{
-		UE_LOG(LogAnimState, Error, TEXT("OnInitialize: (%s)"), *CachedStateFullNameString);
+		UE_LOG(LogAnimState, Log, TEXT("OnInitialize: (%s)"), *CachedStateFullNameString);
 	}
 #endif
 
-	OnInitialize();
+	Execute_OnInitialize(this);
 
 	bInitialized = true;
 
@@ -54,7 +54,7 @@ bool UAnimState::Initialize(UAnimStateMachine* MachineOwner)
 
 void UAnimState::BeginPlay()
 {
-	OnBeginPlay();
+	Execute_OnBeginPlay(this);
 }
 
 void UAnimState::Begin()
@@ -63,10 +63,10 @@ void UAnimState::Begin()
 	bool bDebugging = CVarAnimStateDebug.GetValueOnAnyThread() == 1;
 	if (bDebugging)
 	{
-		UE_LOG(LogAnimState, Error, TEXT("OnBegin: (%s)"), *CachedStateFullNameString);
+		UE_LOG(LogAnimState, Log, TEXT("OnBegin: (%s)"), *CachedStateFullNameString);
 	}
 #endif
-	OnBegin();
+	Execute_OnBegin(this);
 	if (StateTag.IsValid())
 	{
 		UAbilitySystemBlueprintLibrary::AddLooseGameplayTags(GetOwningActor(), StateTag.GetSingleTagContainer());
@@ -81,10 +81,10 @@ void UAnimState::UpdateAnimation(const float DeltaSeconds)
 		bool bDebugging = CVarAnimStateDebug.GetValueOnAnyThread() == 1;
 		if (bDebugging)
 		{
-			UE_LOG(LogAnimState, Error, TEXT("OnUpdateAnimation: (%s)"), *CachedStateFullNameString);
+			UE_LOG(LogAnimState, Log, TEXT("OnUpdateAnimation: (%s)"), *CachedStateFullNameString);
 		}
 #endif
-		OnUpdateAnimation(DeltaSeconds);
+		Execute_OnUpdateAnimation(this,DeltaSeconds);
 	}
 }
 
@@ -99,23 +99,23 @@ void UAnimState::PostEvaluateAnimation()
 			UE_LOG(LogAnimState, Error, TEXT("OnPostEvaluateAnimation: (%s)"), *CachedStateFullNameString);
 		}
 #endif
-		OnPostEvaluateAnimation();
+		Execute_OnPostEvaluateAnimation(this);
 	}
 }
 
 void UAnimState::StateMachineBecomeRelevant()
 {
-	OnStateMachineBecomeRelevant();
+	Execute_OnStateMachineBecomeRelevant(this);
 }
 
 void UAnimState::StateMachineStartBlendingOut()
 {
-	OnStateMachineFinishingBlendingOut();
+	Execute_OnStateMachineFinishingBlendingOut(this);
 }
 
 void UAnimState::StateMachineFinishingBlendingOut()
 {
-	OnStateMachineFinishingBlendingOut();
+	Execute_OnStateMachineFinishingBlendingOut(this);
 }
 
 void UAnimState::Teardown()
@@ -126,10 +126,10 @@ void UAnimState::Teardown()
 		bool bDebugging = CVarAnimStateDebug.GetValueOnAnyThread() == 1;
 		if (bDebugging)
 		{
-			UE_LOG(LogAnimState, Error, TEXT("OnTeardown: (%s)"), *CachedStateFullNameString);
+			UE_LOG(LogAnimState, Log, TEXT("OnTeardown: (%s)"), *CachedStateFullNameString);
 		}
 #endif
-		OnTeardown();
+		Execute_OnTeardown(this);
 	}
 	bInitialized = false;
 	Reset();
@@ -148,10 +148,10 @@ void UAnimState::End()
 	bool bDebugging = CVarAnimStateDebug.GetValueOnAnyThread() == 1;
 	if (bDebugging)
 	{
-		UE_LOG(LogAnimState, Error, TEXT("OnEnd: (%s)"), *CachedStateFullNameString);
+		UE_LOG(LogAnimState, Log, TEXT("OnEnd: (%s)"), *CachedStateFullNameString);
 	}
 #endif
-	OnEnd();
+	Execute_OnEnd(this);
 	if (StateTag.IsValid())
 	{
 		UAbilitySystemBlueprintLibrary::RemoveLooseGameplayTags(GetOwningActor(), StateTag.GetSingleTagContainer());

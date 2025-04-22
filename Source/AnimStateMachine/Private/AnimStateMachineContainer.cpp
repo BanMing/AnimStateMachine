@@ -37,7 +37,7 @@ bool UAnimStateMachineContainer::Initialize(UAnimInstance* AnimInstance)
 	}
 
 	bInitialized = true;
-	return false;
+	return true;
 }
 
 void UAnimStateMachineContainer::BeginPlay()
